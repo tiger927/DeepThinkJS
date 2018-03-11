@@ -1,4 +1,4 @@
-function NN(inp,hid,out,data,label,lr,actfun) {
+function MLPNN(inp,hid,out,data,label,lr,actfun) {
 	this.inp = inp;
 	this.hid = hid;
 	this.out = out;
@@ -17,7 +17,7 @@ function NN(inp,hid,out,data,label,lr,actfun) {
 	}
 }
 
-NN.prototype.init = function(b) {
+MLPNN.prototype.init = function(b) {
 	for(var i = 0;i < this.nums;i++) {
 		if(i == 0) {
 			this.layers[i] = [];
@@ -46,7 +46,7 @@ NN.prototype.init = function(b) {
 	}
 }
 
-NN.prototype.activate = function(w,inp) {
+MLPNN.prototype.activate = function(w,inp) {
 	var result = w[0];
 	for(var i = 1;i < w.length;i++) {
 		result += w[i] * inp[i - 1];
@@ -54,7 +54,7 @@ NN.prototype.activate = function(w,inp) {
 	return result;
 }
 
-NN.prototype.backward = function(label) {
+MLPNN.prototype.backward = function(label) {
 	for(var i = this.nums - 1;i >= 1;i--) {
 		var errors = [];
 		if(i == this.nums - 1) {
@@ -79,7 +79,7 @@ NN.prototype.backward = function(label) {
 	}
 }
 
-NN.prototype.clear = function(data) {
+MLPNN.prototype.clear = function(data) {
 	for(var i = 1;i < this.nums;i++) {
 		for(var j = 0;j < this.nlayers[i];j++) {
 			delete this.layers[i][j].delta;
@@ -88,7 +88,7 @@ NN.prototype.clear = function(data) {
 	}
 }
 
-NN.prototype.forward = function(data) {
+MLPNN.prototype.forward = function(data) {
 	var inputs = data;
 	for(var i = 1;i < this.nums;i++) {
 		var ninp = [];
@@ -103,7 +103,7 @@ NN.prototype.forward = function(data) {
 	return inputs;
 }
 
-NN.prototype.train = function() {
+MLPNN.prototype.train = function() {
 	var error = 0;
 	for(var j = 0;j < this.data.length;j++) {
 		var cur = this.data[j];
@@ -117,7 +117,7 @@ NN.prototype.train = function() {
 	console.log("Cost: " + error);
 }
 
-NN.prototype.update = function(input) {
+MLPNN.prototype.update = function(input) {
 	for(var i = 1;i < this.nums;i++) {
 		inputs = input.slice(0);
 		if(i != 1) {
