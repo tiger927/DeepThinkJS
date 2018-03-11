@@ -8,6 +8,7 @@ function MLPNN(inp,hid,out,data,label,lr,actfun) {
 	this.lr = lr;
 	this.layers = [];
 	this.nlayers = [];
+	this.train_count = 0;
 	if(actfun == "sigmoid") {
 		this.actfun = sigmoid;
 	}else if(actfun == "tanh") {
@@ -103,7 +104,7 @@ MLPNN.prototype.forward = function(data) {
 	return inputs;
 }
 
-MLPNN.prototype.train = function() {
+MLPNN.prototype.train = function(o) {
 	var error = 0;
 	for(var j = 0;j < this.data.length;j++) {
 		var cur = this.data[j];
@@ -114,7 +115,10 @@ MLPNN.prototype.train = function() {
 		this.backward(this.label[j]);
 		this.update(cur);
 	}
-	console.log("Cost: " + error);
+	this.train_count++;
+	if(o) {
+		console.log("Epoch " + this.train_count + " Cost: " + error);
+	}
 }
 
 MLPNN.prototype.update = function(input) {
@@ -148,6 +152,6 @@ function tanh(n,b) {
 	if(b) {
 		return 1 - n * n;
 	}else{
-		return (1.0 - Math.exp(-2*n))/(1.0 + Math.exp(-2*n))
+		return Math.tanh(n);
 	}
 }
