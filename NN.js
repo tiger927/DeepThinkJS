@@ -1,4 +1,4 @@
-function NN(inp,hid,out,data,label,lr) {
+function NN(inp,hid,out,data,label,lr,actfun) {
 	this.inp = inp;
 	this.hid = hid;
 	this.out = out;
@@ -8,6 +8,13 @@ function NN(inp,hid,out,data,label,lr) {
 	this.lr = lr;
 	this.layers = [];
 	this.nlayers = [];
+	if(actfun == "sigmoid") {
+		this.actfun = sigmoid;
+	}else if(actfun == "tanh") {
+		this.actfun = tanh;
+	}else{
+		console.log("Activation Function Type cannot be identified");
+	}
 }
 
 NN.prototype.init = function(b) {
@@ -29,7 +36,7 @@ NN.prototype.init = function(b) {
 			tmp["weights"] = [];
 			for(var k = 0;k < this.nlayers[i - 1] + 1;k++) {
 				if(b) {
-					tmp["weights"].push(Math.random());
+					tmp["weights"].push(Math.random() * 2 - 1);
 				}else{
 					tmp["weights"].push(1);
 				}
@@ -66,7 +73,7 @@ NN.prototype.backward = function(label) {
 			}
 		}
 		for(var j = 0;j < this.nlayers[i];j++) {
-			this.layers[i][j]["delta"] = errors[j] * sigmoid(this.layers[i][j]["output"],true);
+			this.layers[i][j]["delta"] = errors[j] * this.actfun(this.layers[i][j]["output"],true);
 		}
 
 	}
@@ -88,7 +95,7 @@ NN.prototype.forward = function(data) {
 		for(var j = 0;j < this.layers[i].length;j++) {
 			var neuron = this.layers[i][j];
 			var activation = this.activate(neuron["weights"],inputs);
-			neuron["output"] = sigmoid(activation);
+			neuron["output"] = this.actfun(activation,false);
 			ninp.push(neuron["output"]);
 		}
 		inputs = ninp;
@@ -134,5 +141,13 @@ function sigmoid(n,b) {
 		return n * (1 - n);
 	}else{
 		return 1/(1 + Math.exp(-n));
+	}
+}
+
+function tanh(n,b) {
+	if(b) {
+		return 1 - n * n;
+	}else{
+		return (1.0 - Math.exp(-2*n))/(1.0 + Math.exp(-2*n))
 	}
 }
