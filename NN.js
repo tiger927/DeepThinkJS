@@ -116,6 +116,7 @@ MLPNN.prototype.train = function(o) {
 		this.update(cur);
 	}
 	this.train_count++;
+	this.cost = error;
 	if(o) {
 		console.log("Epoch " + this.train_count + " Cost: " + error);
 	}
