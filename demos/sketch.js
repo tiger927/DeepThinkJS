@@ -12,7 +12,7 @@ function setup() {
 		labels.push([(ran * ran / 5 - ran - 2 * Math.abs(Math.sin(ran * 2)) + 1) * 0.3]);
 	}
 	createCanvas(1000,600);
-	nn = new MLPNN(1,[10,9],1,datas,labels,0.03,"tanh");
+	nn = new FFNN(1,[10,9],1,datas,labels,0.03,"tanh");
 	nn.init(true);
 	coste = document.getElementById("Cost");
 	epoche = document.getElementById("Epoch");
