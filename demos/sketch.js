@@ -1,6 +1,8 @@
 var nn;
 var datas = [];
 var labels = [];
+var coste;
+var epoche;
 
 function setup() {
 	for(var i = 0;i < 150;i++) {
@@ -12,6 +14,8 @@ function setup() {
 	createCanvas(1000,600);
 	nn = new MLPNN(1,[10,9],1,datas,labels,0.03,"tanh");
 	nn.init(true);
+	coste = document.getElementById("Cost");
+	epoche = document.getElementById("Epoch");
 }
 
 function draw() {
@@ -25,6 +29,8 @@ function draw() {
 		ellipse(i * 5 + 10,300 - (nn.forward([i / 20])[0] * 200 + 10),4,4);
 	}
 	for(var i = 0;i < 20;i++) nn.train();
+	coste.innerHTML = "Cost: " + nn.cost;
+	epoche.innerHTML = "Epoch: " + nn.train_count;
 	stroke(255);
 	line(0,90,1000,90);
 	line(0,490,1000,490)
