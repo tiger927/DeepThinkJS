@@ -1,4 +1,4 @@
-function FFNN(inp,hid,out,data,label,lr,actfun) {
+function MLPNN(inp,hid,out,data,label,lr,actfun) {
 	this.inp = inp;
 	this.hid = hid;
 	this.out = out;
@@ -18,7 +18,7 @@ function FFNN(inp,hid,out,data,label,lr,actfun) {
 	}
 }
 
-FFNN.prototype.init = function(b) {
+MLPNN.prototype.init = function(b) {
 	for(var i = 0;i < this.nums;i++) {
 		if(i == 0) {
 			this.layers[i] = [];
@@ -47,7 +47,7 @@ FFNN.prototype.init = function(b) {
 	}
 }
 
-FFNN.prototype.activate = function(w,inp) {
+MLPNN.prototype.activate = function(w,inp) {
 	var result = w[0];
 	for(var i = 1;i < w.length;i++) {
 		result += w[i] * inp[i - 1];
@@ -55,7 +55,7 @@ FFNN.prototype.activate = function(w,inp) {
 	return result;
 }
 
-FFNN.prototype.backward = function(label) {
+MLPNN.prototype.backward = function(label) {
 	for(var i = this.nums - 1;i >= 1;i--) {
 		var errors = [];
 		if(i == this.nums - 1) {
@@ -80,7 +80,7 @@ FFNN.prototype.backward = function(label) {
 	}
 }
 
-FFNN.prototype.clear = function(data) {
+MLPNN.prototype.clear = function(data) {
 	for(var i = 1;i < this.nums;i++) {
 		for(var j = 0;j < this.nlayers[i];j++) {
 			delete this.layers[i][j].delta;
@@ -89,7 +89,7 @@ FFNN.prototype.clear = function(data) {
 	}
 }
 
-FFNN.prototype.forward = function(data) {
+MLPNN.prototype.forward = function(data) {
 	var inputs = data;
 	for(var i = 1;i < this.nums;i++) {
 		var ninp = [];
@@ -104,7 +104,7 @@ FFNN.prototype.forward = function(data) {
 	return inputs;
 }
 
-FFNN.prototype.train = function(o) {
+MLPNN.prototype.train = function(o) {
 	var error = 0;
 	for(var j = 0;j < this.data.length;j++) {
 		var cur = this.data[j];
@@ -122,7 +122,7 @@ FFNN.prototype.train = function(o) {
 	}
 }
 
-FFNN.prototype.update = function(input) {
+MLPNN.prototype.update = function(input) {
 	for(var i = 1;i < this.nums;i++) {
 		inputs = input.slice(0);
 		if(i != 1) {
