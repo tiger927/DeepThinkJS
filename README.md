@@ -1,2 +1,2 @@
 # DeepThinkJS
-machine learning algorithms library for javascript
+A machine learning algorithms library for javascript
