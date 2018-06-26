@@ -1,3 +1,212 @@
+//CNN SECTION START
+function CNN(inp,out,data,label,hid,lr,actfun) {
+	this.inp = inp;
+	this.out = out;
+	this.data = data;
+	this.label = label;
+	this.layers = [];
+	this.train_count = 0;
+
+	this.hid = hid;
+	this.lr = lr;
+	this.actfun = actfun;
+	this.status = false;
+}
+
+CNN.prototype.train = function() {
+	if(status) {
+		
+	}else{
+		this.start();
+		this.train();
+	}
+}
+
+CNN.prototype.start = function() {
+	this.status = true;
+	this.forward();
+	var inputs = this.fulConv();
+	this.fulCon = new MLPNN(inputs.length,this.hid,this.out,inputs,this.labels,this.lr,this.actfun);
+}
+
+CNN.prototype.fulConV = function() {
+	var datas = this.now.slice(0);
+	var total = [];
+	for(var i = 0;i < datas.length;i++) {
+		var tmp = [];
+		for(var j = 0;j < datas[i].length;j++) {
+			for(var a = 0;a < datas[i][j].length;a++) {
+				for(var b = 0;b < datas[i][j][a].length;b++) {
+					tmp.push(datas[i][j][a][b]);
+				}
+			}
+		}
+		total.push(tmp);
+	}
+	return total;
+}
+
+CNN.prototype.addLayer = function(obj) {
+	if(obj["name"] == "fConv") {
+		var ker = obj["kernel"];
+		var n = obj["number"];
+		var stride = obj["stride"];
+		var tmp = [];
+		for(var i = 0;i < n;i++) {
+			tmp.push(this.ranM(ker));
+		}
+		var biastmp = [];
+		for(var i = 0;i < n;i++) {
+			biastmp.push(Math.random() * 2 - 1);
+		}
+		this.layers.push({"s":stride,"type":"normal","content":tmp,"bias":biastmp});
+	}else if(obj["name"] == "RELU") {
+		this.layers.push({"type":"RELU"});
+	}else if(obj["name"] == "pool") {
+		var type = obj["type"];
+		var n = obj["n"];
+		this.layers.push({"type":"pool","method":type,"s":n});
+	}else{
+		console.log("Cannot recognize type");
+	}
+}
+
+CNN.prototype.addA = function(arr1,arr2) {
+	var result = [];
+	for(var i = 0;i < arr1.length;i++) {
+		result[i] = [];
+		for(var j = 0;j < arr1[i].length;j++) {
+			result[i][j] = arr1[i][j] + arr2[i][j];
+		}
+	}
+	return result;
+}
+
+CNN.prototype.deleteL = function() {
+	this.layers.pop();
+}
+
+CNN.prototype.forward = function() {
+	this.now = this.data.slice(0);
+	for(var i = 0;i < this.layers.length;i++) {
+		if(this.layers[i]["type"] == "normal") {
+			var finaltmp = [];
+			for(var c = 0;c < this.now.length;c++) {
+				for(var j = 0;j < this.layers[i]["content"].length;j++) {
+					var tmp2 = [];
+					for(var a = 0;a <= this.now[c][0].length - this.layers[i]["content"][j].length;a++) {
+						tmp2[a] = [];
+						for(var b = 0;b <= this.now[c][0][a].length - this.layers[i]["content"][j].length;b++) {
+							tmp2[a][b] = this.layers[i]["bias"][j];
+						}
+					}
+					for(var k = 0;k < this.now[c].length;k++) {
+						tmp2 = this.addA(this.applyF(this.now[c][k],this.layers[i]["content"][j],1),tmp2).slice(0);
+					}
+				}
+				finaltmp.push(tmp2);
+			}
+			this.now = finaltmp.slice(0);
+		}else if(this.layers[i]["type"] == "RELU") {
+			for(var j = 0;j < this.now.length;j++) {
+				for(var c = 0;c < this.now[j].length;c++) {
+					for(var a = 0;a < this.now[j][c].length;a++) {
+						for(var b = 0;b < this.now[j][c][a].length;b++) {
+							this.now[j][c][a][b] = Math.max(this.now[j][c][a][b],0);
+						}
+					}
+				}
+			}
+		}else if(this.layers[i]["type"] == "pool") {
+			var s = this.layers[i]["s"];
+			var method = this.layers[i]["method"];
+			var tmp = [];
+			for(var j = 0;j < this.now.length;j++) {
+				var tmp2 = [];
+				for(var e = 0;e < this.now[j].length;e++) {
+					var tmp3 = [];
+					for(var a = 0;a < this.now[j][e].length;a += s) {
+						tmp3[a/s] = [];
+						for(var b = 0;b < this.now[j][e][a].length;b += s) {
+							var max = - Number.MAX_VALUE;
+							var sum = 0;
+							for(var c = 0;c < s&&a + c < this.now[j][e].length;c++) {
+								for(var d = 0;d < s&&b + d < this.now[j][e][a].length;d++) {
+									if(this.layers[i]["method"] == "max") {
+										if(this.now[j][e][a + c][b + d] > max) {
+											max = this.now[j][e][a + c][b + d];
+										}
+									}else if(this.layers[i]["method"] == "average") {
+										sum += this.now[j][e][a + c][b + d];
+									}
+								}
+							}
+							if(this.layers[i]["method"] == "max") {
+								tmp3[a/s][b/s] = max;
+							}else if(this.layers[i]["method"] == "average") {
+								tmp3[a/s][b/s] = sum / s / s;
+							}
+						}
+					}
+					tmp2.push(tmp3);
+				}
+				tmp.push(tmp2);
+			}
+			this.now = tmp.slice(0);
+		}
+	}
+}
+
+CNN.prototype.applyF = function(graph,filter,s) {
+	var result = [];
+	for(var i = 0;i <= graph.length - filter.length;i += s) {
+		result[i] = [];
+		for(var j = 0;j <= graph.length - filter.length;j += s) {
+			var tmp = 0;
+			for(var a = 0;a < filter.length;a++) {
+				for(var b = 0;b < filter.length;b++) {
+					tmp += graph[a + i][b + j] * filter[a][b];
+				}
+			}
+			result[i][j] = tmp / filter.length / filter.length;
+		}
+	}
+	return result;
+
+}
+
+CNN.prototype.ranM = function(n) {
+	var result = [];
+	for(var i = 0;i < n;i++) {
+		result[i] = [];
+		for(var j = 0;j < n;j++) {
+			result[i][j] = Math.random() * 2 - 1;
+		}
+	}
+	return result;
+}
+
+CNN.prototype.padding = function(x) {
+	for(var k = 0;k < this.data.length;k++) {
+		var result = [];
+		for(var i = 0;i < this.data[k].length + 2 * x;i++) {
+			result[i] = [];
+			for(var j = 0;j < this.data[k][0].length + 2 * x;j++) {
+				if(i >= x && i < this.data[k].length + x && j >= x && j < this.data[k][0].length + x) {
+					result[i][j] = this.data[k][i - x][j - x];
+				}else{
+					result[i][j] = 0;
+				}
+			}
+		}
+		this.data[k] = result;
+	}
+
+}
+//CNN SECTION END
+
+
+
 //KNN SECTION START
 
 function KNN(data,label) {
@@ -148,8 +357,6 @@ MLPNN.prototype.init = function(b) {
 
 MLPNN.prototype.activate = function(w,inp) {
 	var result = w[0];
-	console.log("Hello world");
-
 	for(var i = 1;i < w.length;i++) {
 		result += w[i] * inp[i - 1];
 	}
@@ -174,11 +381,13 @@ MLPNN.prototype.backward = function(label) {
 				errors.push(tmp);
 			}
 		}
+
 		for(var j = 0;j < this.nlayers[i];j++) {
 			this.layers[i][j]["delta"] = errors[j] * this.actfun(this.layers[i][j]["output"],true);
 		}
 
 	}
+
 }
 
 MLPNN.prototype.clear = function(data) {
